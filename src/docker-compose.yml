@@ -1,0 +1,29 @@
+version: '3.7'
+services:
+  db:
+    image: "postgres:13.3"
+    environment:
+        POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+       - ./data:/var/lib/postgresql/data
+    ports:
+     - 5432:5432
+
+  rstudio:
+    image: rocker/tidyverse:4.1
+    container_name: rstudio_test
+    restart: always
+    ports:
+     - 8787:8787
+     - 3838:3838
+    privileged: true
+    environment:
+     USER: rstudio
+     PASSWORD: qwerty
+     root: "TRUE"
+    volumes:
+     - type: "bind"
+       source: "./../"
+       target: "/home/rstudio"
+    depends_on:
+     - "db"
