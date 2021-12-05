@@ -1,5 +1,6 @@
 !#/usr/bin/bash
 
+#Tenemos que estar posicionados en la carpeta src (data_1/heart.csv tiene que estar tmb en src)
 cd src
 
 #Instalación de docker compose
@@ -29,6 +30,10 @@ CREATE TABLE heart (id smallint not null, title character varying(200) not null,
 
 #Con esto vemos los esquemas o tablas
  \d
+
+#Hacemos el copy del csv
+\copy heart (id, title, description) FROM '/var/lib/postgresql/data_1/' CSV HEADER DELIMITER ',';
+
 
 #Insertamos un nuevo registro
 INSERT INTO heart (id, title, description) VALUES (1, 'Postgres', 'haciendo pruebas');
