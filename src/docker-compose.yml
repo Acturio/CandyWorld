@@ -5,7 +5,8 @@ services:
     environment:
         POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
-       - ./data:/var/lib/postgresql/data
+       - ./data/tiny_heart.csv:/var/lib/postgresql/pg_data
+       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
      - 5432:5432
 
