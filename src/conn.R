@@ -15,4 +15,4 @@ con <- DBI::dbConnect(
 DBI::dbListTables(conn = con)
 
 data <- tbl(con, "heart")
-data
+data_collect <- collect(data)
