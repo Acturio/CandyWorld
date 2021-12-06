@@ -13,27 +13,9 @@ library(tidymodels)
 prediccion_hd <- function(req){
   example <- req$postBody
   parsed_example <- jsonlite::fromJSON(example)
-  model <- read_rds("logistic_model.Rds")
-  resultado <- predict(logistic_fit, bake(prep(heart_recipe), parsed_example), type = 'prob')
+  model <- readRDS("logistic_model.Rds")
+  recipe <- readRDS("recipe.Rds")
+  resultado <- predict(model, bake(prep(recipe), parsed_example), type = 'prob')
   return(resultado)
 
 }
-
-
-# 
-# prediccion_prueba <- function(example){
-#   #example <- req$postBody
-#   parsed_example <- jsonlite::fromJSON(example)
-#   model <- read_rds("logistic_model.Rds")
-#   resultado <- predict(logistic_fit, bake(prep(heart_recipe), parsed_example), type = 'prob')
-#   return(resultado)
-# }
-
-# prueba_df <- heart_test %>% head(1)
-# pruebaJSON <- prueba_df %>% toJSON()
-# 
-# prediccion_prueba(pruebaJSON)
-# 
-# prediccion_prueba(pruebaJSON)
-
-#prediccion_prueba()
