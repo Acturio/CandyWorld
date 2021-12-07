@@ -45,7 +45,7 @@ pr_curve_cla_logistico <- pr_curve(results_cla_logistico, truth = heartdisease, 
 # Save the model
 readr::write_rds(logistic_fit, "logistic_model.Rds")
 readr::write_rds(heart_recipe, "recipe.Rds")
-
+readr::write_rds(heart_test, "heart_test_dataset.Rds")
 
 
 
