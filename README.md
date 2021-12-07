@@ -9,3 +9,5 @@ AWK, ML model and API project
 `curl -o plot.png localhost:3838/roc_curve_plot --request GET; xdg-open curva_roc.png`
 
 `curl -o plot.png localhost:3838/pr_curve_plot --request GET; xdg-open pr_plot.png`
+
+`curl localhost:3838/metrics --request GET` 
