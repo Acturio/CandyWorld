@@ -56,10 +56,13 @@ reentrenamiento <- function(req){
   DBI::dbListTables(conn = con)
   data <- tbl(con, "heart")
   data<-data %>% collect()
-  heart = heart %>% mutate(heartdisease = as_factor(heartdisease))
+  heart = data %>% mutate(heartdisease = as_factor(heartdisease))
   heart_split <- initial_split(heart, prop = 0.80)
   heart_train <- training(heart_split)
   heart_test  <-  testing(heart_split)
+  n_train<-nrow(heart_train)
+  n_test<-nrow(heart_test)
+  suma<-sum(n_train,n_test)
   heart_recipe <- recipe(heartdisease ~ ., data = heart_train) %>%
     step_mutate(cholesterol = ifelse(cholesterol== 0 , median (cholesterol), cholesterol) )%>%
     step_normalize(all_numeric_predictors()) %>%
@@ -74,15 +77,13 @@ reentrenamiento <- function(req){
   readr::write_rds(logistic_fit, "logistic_model.Rds")
   readr::write_rds(heart_recipe, "recipe.Rds")
   readr::write_rds(heart_test, "heart_test_dataset.Rds")
-  print("Reentrenamiento Completado")
-  print(heart_split)
-  print("hola")
+  print(paste("Reentrenamiento Completado. Entrenamiento:", n_train," Test:", n_test," Total:", suma))
 }
 
 
 
 #* @serializer contentType list(type='image/png')
-#* @get /plot
+#* @get /roc_curve_plot
 function(){
   model <- readRDS("logistic_model.Rds")
   recipe <- readRDS("recipe.Rds")
@@ -94,13 +95,13 @@ function(){
                                        =.pred_1, event_level = 'second') %>%
     mutate(ID = 'Logit')
   plot <- autoplot(roc_curve_cla_logistico)
-  file <- "plot.png"
+  file <- "curva_roc.png"
   ggsave(file, plot)
   readBin(file, "raw", n = file.info(file)$size)
 }
 
 #* @serializer contentType list(type='image/png')
-#* @get /plot2
+#* @get /pr_curve_plot
 function(){
   model <- readRDS("logistic_model.Rds")
   recipe <- readRDS("recipe.Rds")
@@ -112,13 +113,8 @@ function(){
                                      =.pred_1, event_level = 'second') %>%
     mutate(ID = 'Logit')
   plot2 <- autoplot(pr_curve_cla_logistico)
-  file2 <- "plot2.png"
+  file2 <- "pr_plot.png"
   ggsave(file2, plot2)
   readBin(file2, "raw", n = file.info(file2)$size)
 }
 
-# #* @plumber 
-# function(pr) {
-#   pr %>% 
-#     pr_set_docs(docs = "rapidoc")
-# }
