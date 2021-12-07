@@ -16,7 +16,7 @@ services:
     restart: always
     ports:
      - 8787:8787
-     - 3838:3838
+     - 8000:8000
     privileged: true
     environment:
      USER: rstudio
