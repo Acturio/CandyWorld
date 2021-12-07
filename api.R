@@ -40,10 +40,20 @@ new_data<-function(req) {
 
 }
 
+
+
 #* @serializer contentType list(type='image/png')
 #* @get /plot
 function(){
   model <- readRDS("logistic_model.Rds")
+  recipe <- readRDS("recipe.Rds")
+  heart_test <- readRDS("heart_test_dataset.Rds")
+  bake_test <- bake(prep(recipe), heart_test)
+  results_cla_logistico <- predict(model, bake_test, type = 'prob') %>%
+    bind_cols(bake_test)
+  roc_curve_cla_logistico <- roc_curve(results_cla_logistico, truth = heartdisease, estimate
+                                       =.pred_1, event_level = 'second') %>%
+    mutate(ID = 'Logit')
   plot <- autoplot(roc_curve_cla_logistico)
   file <- "plot.png"
   ggsave(file, plot)
@@ -54,14 +64,22 @@ function(){
 #* @get /plot2
 function(){
   model <- readRDS("logistic_model.Rds")
+  recipe <- readRDS("recipe.Rds")
+  heart_test <- readRDS("heart_test_dataset.Rds")
+  bake_test <- bake(prep(recipe), heart_test)
+  results_cla_logistico <- predict(model, bake_test, type = 'prob') %>%
+    bind_cols(bake_test)
+  pr_curve_cla_logistico <- pr_curve(results_cla_logistico, truth = heartdisease, estimate
+                                     =.pred_1, event_level = 'second') %>%
+    mutate(ID = 'Logit')
   plot2 <- autoplot(pr_curve_cla_logistico)
   file2 <- "plot2.png"
   ggsave(file2, plot2)
   readBin(file2, "raw", n = file.info(file2)$size)
 }
 
-#* @plumber 
-function(pr) {
-  pr %>% 
-    pr_set_docs(docs = "rapidoc")
-}
+# #* @plumber 
+# function(pr) {
+#   pr %>% 
+#     pr_set_docs(docs = "rapidoc")
+# }
