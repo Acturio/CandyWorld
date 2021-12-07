@@ -80,6 +80,20 @@ reentrenamiento <- function(req){
   print(paste("Reentrenamiento Completado. Entrenamiento:", n_train," Test:", n_test," Total:", suma))
 }
 
+#* @get /metrics
+function(){
+  model <- readRDS("logistic_model.Rds")
+  recipe <- readRDS("recipe.Rds")
+  heart_test <- readRDS("heart_test_dataset.Rds")
+  bake_test <- bake(prep(recipe), heart_test)
+  results_cla_logistico <- predict(model, bake_test, type = 'prob') %>%
+    bind_cols(bake_test)
+  roc_curve_cla_logistico <- roc_curve(results_cla_logistico, truth = heartdisease, estimate
+                                       =.pred_1, event_level = 'second') 
+ auc_roc<-roc_auc(results_cla_logistico,truth = heartdisease, .pred_1,event_level = 'second')
+ print(auc_roc)
+}
+
 
 
 #* @serializer contentType list(type='image/png')
