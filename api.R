@@ -9,6 +9,9 @@ library(tidyverse)
 library(tidymodels)
 
 
+##Lee el modelo
+#model <- readRDS("logistic_model.Rds")
+
 #* @post /prediccion_hd
 prediccion_hd <- function(req){
   example <- req$postBody
@@ -38,6 +41,42 @@ new_data<-function(req) {
 
   return(data_collect)
 
+}
+
+#* @post /re_train
+reentrenamiento <- function(req){
+  con= DBI::dbConnect(
+    drv = RPostgres::Postgres(),
+    dbname = 'health',
+    host = "localhost",
+    user = 'postgres',
+    password = 'postgres',
+    port = 5432
+  )
+  DBI::dbListTables(conn = con)
+  data <- tbl(con, "heart")
+  data<-data %>% collect()
+  heart = heart %>% mutate(heartdisease = as_factor(heartdisease))
+  heart_split <- initial_split(heart, prop = 0.80)
+  heart_train <- training(heart_split)
+  heart_test  <-  testing(heart_split)
+  heart_recipe <- recipe(heartdisease ~ ., data = heart_train) %>%
+    step_mutate(cholesterol = ifelse(cholesterol== 0 , median (cholesterol), cholesterol) )%>%
+    step_normalize(all_numeric_predictors()) %>%
+    step_dummy(all_nominal_predictors())
+  
+  juice_train <- juice(prep(heart_recipe))
+  bake_test <- bake(prep(heart_recipe), heart_test)
+  
+  # Specify the model
+  logistic_model <- logistic_reg() %>% set_engine("glm")
+  logistic_fit <- fit(logistic_model, heartdisease ~ ., juice_train)
+  readr::write_rds(logistic_fit, "logistic_model.Rds")
+  readr::write_rds(heart_recipe, "recipe.Rds")
+  readr::write_rds(heart_test, "heart_test_dataset.Rds")
+  print("Reentrenamiento Completado")
+  print(heart_split)
+  print("hola")
 }
 
 
